@@ -6,6 +6,7 @@ import xyz.eclipseisoffline.commonpermissionsapi.api.CommonPermissions;
 public interface StatisticsInfoPermissions {
     CommonPermissionNode STATISTICS_GET = createNode("get");
     CommonPermissionNode STATISTICS_GET_OTHER = createNode("get.other");
+    CommonPermissionNode STATISTICS_SHARE = createNode("share");
     CommonPermissionNode STATISTICS_LEADERBOARD = createNode("leaderboard");
 
     private static CommonPermissionNode createNode(String name) {

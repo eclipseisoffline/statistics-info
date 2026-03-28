@@ -105,7 +105,7 @@ public abstract class StatisticsInfo {
         boolean targetIsSource = target == context.getSource().getPlayer();
         MutableComponent subject = targetIsSource ? Component.literal("You have ") : Component.empty().append(target.getDisplayName()).append(" has ");
         MutableComponent feedback = subject.append(formatStatisticInfoForDisplay(target, stat)).append(" ");
-        if (targetIsSource) {
+        if (targetIsSource && CommonPermissions.check(context.getSource(), StatisticsInfoPermissions.STATISTICS_SHARE, PermissionLevel.GAMEMASTERS)) {
             feedback.append(Component.literal("[share]")
                     .withStyle(style -> style.withClickEvent(new ClickEvent.Custom(SHARE_STATISTICS_ACTION, Optional.of(shareInfo)))));
         }

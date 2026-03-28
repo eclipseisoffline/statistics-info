@@ -12,6 +12,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
 import org.spongepowered.asm.mixin.Final;
@@ -21,7 +22,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import xyz.eclipseisoffline.commonpermissionsapi.api.CommonPermissions;
 import xyz.eclipseisoffline.statisticsinfo.StatisticsInfo;
+import xyz.eclipseisoffline.statisticsinfo.StatisticsInfoPermissions;
 
 import java.util.Optional;
 
@@ -35,7 +38,8 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
     @Inject(method = "handleCustomClickAction", at = @At("HEAD"), cancellable = true)
     public void handleShareStatisticsAction(ServerboundCustomClickActionPacket packet, CallbackInfo callbackInfo) {
         //noinspection ConstantValue
-        if (packet.id().equals(StatisticsInfo.SHARE_STATISTICS_ACTION) && (Object) this instanceof ServerGamePacketListenerImpl gamePacketListener) {
+        if (packet.id().equals(StatisticsInfo.SHARE_STATISTICS_ACTION) && (Object) this instanceof ServerGamePacketListenerImpl gamePacketListener
+                && CommonPermissions.check(gamePacketListener.player, StatisticsInfoPermissions.STATISTICS_SHARE, PermissionLevel.GAMEMASTERS)) {
             callbackInfo.cancel();
             packet.payload().ifPresent(tag -> {
                 if (tag instanceof CompoundTag compound) {
