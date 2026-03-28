@@ -17,6 +17,7 @@ import net.minecraft.server.players.NameAndId;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
@@ -75,7 +76,7 @@ public abstract class StatisticsInfo {
                                                 Stat<?> stat = StatKeyArgument.getStatKey(context, "key", type);
                                                 List<Pair<UUID, Integer>> leaderboard = ((ServerStatsManager) context.getSource().getServer().getPlayerList()).statistics_info$getLeaderboard(stat);
 
-                                                context.getSource().sendSuccess(() -> Component.literal("Leaderboard for ").append(formatStatisticNameForDisplay(stat)), false);
+                                                context.getSource().sendSuccess(() -> Component.literal("Leaderboard for ").append(formatStatisticNameForDisplay(stat)).append(":"), false);
 
                                                 for (int i = 0; i < Math.min(5, leaderboard.size()); i++) {
                                                     Pair<UUID, Integer> entry = leaderboard.get(i);
@@ -99,7 +100,7 @@ public abstract class StatisticsInfo {
 
     public static Component formatStatisticNameForDisplay(Stat<?> stat) {
         if (stat.getType() == Stats.CUSTOM) {
-            return Component.literal(getStatIdentifier(stat).toString());
+            return getStatKeyDisplay(stat);
         } else {
             String verb = STAT_VERBS.getOrDefault(stat.getType(), stat.getType().getDisplayName().getString());
             return Component.literal(verb + " ").append(getStatKeyDisplay(stat));
@@ -110,7 +111,7 @@ public abstract class StatisticsInfo {
         int value = player.getStats().getValue(stat);
 
         if (stat.getType() == Stats.CUSTOM) {
-            return Component.literal(stat.format(value) + " of ").append(getStatIdentifier(stat).toString());
+            return Component.literal(stat.format(value) + " of ").append(getStatKeyDisplay(stat));
         } else {
             String verb = STAT_VERBS.getOrDefault(stat.getType(), stat.getType().getDisplayName().getString());
             return Component.literal(verb + " ").append(getStatKeyDisplay(stat)).append(" " + stat.format(value) + " times");
@@ -118,8 +119,12 @@ public abstract class StatisticsInfo {
     }
 
     public static Component getStatKeyDisplay(Stat<?> stat) {
-        if (stat.getType() == Stats.BLOCK_MINED) {
+        if (stat.getType() == Stats.CUSTOM) {
+            return Component.translatable("stat." + stat.getValue().toString().replace(':', '.'));
+        } else if (stat.getType() == Stats.BLOCK_MINED) {
             return ((Block) stat.getValue()).getName();
+        } else if (stat.getType() == Stats.ENTITY_KILLED || stat.getType() == Stats.ENTITY_KILLED_BY) {
+            return ((EntityType<?>) stat.getValue()).getDescription();
         }
 
         Identifier statKey = getStatIdentifier(stat);
