@@ -1,10 +1,13 @@
 package xyz.eclipseisoffline.statisticsinfo;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -48,23 +51,10 @@ public abstract class StatisticsInfo {
                     .then(Commands.literal("get")
                             .then(StatTypeArgument.statType("type", buildContext)
                                     .then(StatKeyArgument.statKey("key", context -> StatTypeArgument.getStatType(context, "type").value())
-                                            .executes(context -> {
-                                                ServerPlayer player = context.getSource().getPlayerOrException();
-                                                StatType<?> type = StatTypeArgument.getStatType(context, "type").value();
-                                                Stat<?> stat = StatKeyArgument.getStatKey(context, "key", type);
-                                                int value = player.getStats().getValue(stat);
-
-                                                CompoundTag shareInfo = new CompoundTag();
-                                                shareInfo.putString("type", Objects.requireNonNull(BuiltInRegistries.STAT_TYPE.getKey(type)).toString());
-                                                shareInfo.putString("key", getStatIdentifier(stat).toString());
-
-                                                MutableComponent feedback = Component.literal("You have ").append(formatStatisticInfoForDisplay(player, stat)).append(" ");
-                                                feedback.append(Component.literal("[share]")
-                                                        .withStyle(style -> style.withClickEvent(new ClickEvent.Custom(SHARE_STATISTICS_ACTION, Optional.of(shareInfo)))));
-
-                                                context.getSource().sendSuccess(() -> feedback, false);
-                                                return value;
-                                            })
+                                            .then(Commands.argument("target", EntityArgument.player())
+                                                    .executes(context -> statisticInfoCommand(context, EntityArgument.getPlayer(context, "target")))
+                                            )
+                                            .executes(context -> statisticInfoCommand(context, context.getSource().getPlayerOrException()))
                                     )
                             )
                     )
@@ -97,6 +87,23 @@ public abstract class StatisticsInfo {
     }
 
     protected abstract void registerCommands(BiConsumer<CommandDispatcher<CommandSourceStack>, CommandBuildContext> registerer);
+
+    private static int statisticInfoCommand(CommandContext<CommandSourceStack> context, ServerPlayer target) throws CommandSyntaxException {
+        StatType<?> type = StatTypeArgument.getStatType(context, "type").value();
+        Stat<?> stat = StatKeyArgument.getStatKey(context, "key", type);
+        int value = target.getStats().getValue(stat);
+
+        CompoundTag shareInfo = new CompoundTag();
+        shareInfo.putString("type", Objects.requireNonNull(BuiltInRegistries.STAT_TYPE.getKey(type)).toString());
+        shareInfo.putString("key", getStatIdentifier(stat).toString());
+
+        MutableComponent feedback = Component.literal("You have ").append(formatStatisticInfoForDisplay(target, stat)).append(" ");
+        feedback.append(Component.literal("[share]")
+                .withStyle(style -> style.withClickEvent(new ClickEvent.Custom(SHARE_STATISTICS_ACTION, Optional.of(shareInfo)))));
+
+        context.getSource().sendSuccess(() -> feedback, false);
+        return value;
+    }
 
     public static Component formatStatisticNameForDisplay(Stat<?> stat) {
         if (stat.getType() == Stats.CUSTOM) {
