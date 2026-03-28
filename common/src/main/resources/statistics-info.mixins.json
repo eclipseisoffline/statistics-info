@@ -4,6 +4,7 @@
   "package": "xyz.eclipseisoffline.statisticsinfo.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
+    "PlayerListMixin",
     "ServerCommonPacketListenerImplMixin"
   ],
   "injectors": {

@@ -1,6 +1,7 @@
 package xyz.eclipseisoffline.statisticsinfo;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -12,15 +13,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 
 public abstract class StatisticsInfo {
@@ -53,7 +57,7 @@ public abstract class StatisticsInfo {
                                                 shareInfo.putString("type", Objects.requireNonNull(BuiltInRegistries.STAT_TYPE.getKey(type)).toString());
                                                 shareInfo.putString("key", getStatIdentifier(stat).toString());
 
-                                                MutableComponent feedback = Component.literal("You have ").append(formatStatisticForDisplay(player, stat)).append(" ");
+                                                MutableComponent feedback = Component.literal("You have ").append(formatStatisticInfoForDisplay(player, stat)).append(" ");
                                                 feedback.append(Component.literal("[share]")
                                                         .withStyle(style -> style.withClickEvent(new ClickEvent.Custom(SHARE_STATISTICS_ACTION, Optional.of(shareInfo)))));
 
@@ -64,6 +68,28 @@ public abstract class StatisticsInfo {
                             )
                     )
                     .then(Commands.literal("top")
+                            .then(StatTypeArgument.statType("type", buildContext)
+                                    .then(StatKeyArgument.statKey("key", context -> StatTypeArgument.getStatType(context, "type").value())
+                                            .executes(context -> {
+                                                StatType<?> type = StatTypeArgument.getStatType(context, "type").value();
+                                                Stat<?> stat = StatKeyArgument.getStatKey(context, "key", type);
+                                                List<Pair<UUID, Integer>> leaderboard = ((ServerStatsManager) context.getSource().getServer().getPlayerList()).statistics_info$getLeaderboard(stat);
+
+                                                context.getSource().sendSuccess(() -> Component.literal("Leaderboard for ").append(formatStatisticNameForDisplay(stat)), false);
+
+                                                for (int i = 0; i < Math.min(5, leaderboard.size()); i++) {
+                                                    Pair<UUID, Integer> entry = leaderboard.get(i);
+                                                    String playerName = context.getSource().getServer().services().nameToIdCache().get(entry.getFirst())
+                                                            .map(NameAndId::name)
+                                                            .orElseGet(() -> entry.getFirst().toString());
+                                                    Component leaderboardLine = Component.literal(i + 1 + ". " + playerName + " (" + stat.format(entry.getSecond()) + ")");
+                                                    context.getSource().sendSuccess(() -> leaderboardLine, false);
+                                                }
+
+                                                return 0;
+                                            })
+                                    )
+                            )
                     )
             );
         });
@@ -71,11 +97,20 @@ public abstract class StatisticsInfo {
 
     protected abstract void registerCommands(BiConsumer<CommandDispatcher<CommandSourceStack>, CommandBuildContext> registerer);
 
-    public static Component formatStatisticForDisplay(ServerPlayer player, Stat<?> stat) {
+    public static Component formatStatisticNameForDisplay(Stat<?> stat) {
+        if (stat.getType() == Stats.CUSTOM) {
+            return Component.literal(getStatIdentifier(stat).toString());
+        } else {
+            String verb = STAT_VERBS.getOrDefault(stat.getType(), stat.getType().getDisplayName().getString());
+            return Component.literal(verb + " ").append(getStatKeyDisplay(stat));
+        }
+    }
+
+    public static Component formatStatisticInfoForDisplay(ServerPlayer player, Stat<?> stat) {
         int value = player.getStats().getValue(stat);
 
         if (stat.getType() == Stats.CUSTOM) {
-            return Component.literal(stat.format(value) + " of ").append(getStatKeyDisplay(stat));
+            return Component.literal(stat.format(value) + " of ").append(getStatIdentifier(stat).toString());
         } else {
             String verb = STAT_VERBS.getOrDefault(stat.getType(), stat.getType().getDisplayName().getString());
             return Component.literal(verb + " ").append(getStatKeyDisplay(stat)).append(" " + stat.format(value) + " times");

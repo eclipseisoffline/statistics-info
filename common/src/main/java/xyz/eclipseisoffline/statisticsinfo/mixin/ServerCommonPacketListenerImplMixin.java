@@ -60,7 +60,7 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
             MutableComponent message = Component.empty().withStyle(ChatFormatting.ITALIC);
             message.append(player.getDisplayName().copy());
             message.append(" has ");
-            message.append(StatisticsInfo.formatStatisticForDisplay(player, stat));
+            message.append(StatisticsInfo.formatStatisticInfoForDisplay(player, stat));
             server.getPlayerList().broadcastSystemMessage(message, false);
         });
     }
