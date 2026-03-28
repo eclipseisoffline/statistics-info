@@ -64,16 +64,16 @@ The mod adds a single new command, `/stats`, which can be used as follows:
   - Displays a leaderboard for the given statistic.
   - Examples:
     - `/stats top minecraft:picked_up minecraft:elytra`
-      > `Leaderboard for picked up Elytra:`
-      > `1. Player271 (198)`
-      > `2. Player709 (79)`
-      > `3. Player818 (36)`
-      > `4. Player734 (34)`
-      > `5. Player753 (23)`
+      > `Leaderboard for picked up Elytra:`  
+        `1. Player271 (198)`  
+        `2. Player709 (79)`  
+        `3. Player818 (36)`  
+        `4. Player734 (34)`  
+        `5. Player753 (23)`
     - `/stats top custom play_time`
-      > `Leaderboard for Time Played:`
-      > `1. Player271 (11.01 h)`
-      > `2. Player709 (5.05 h)`
-      > `3. Player818 (2.1 h)`
-      > `4. Player734 (11.05 min)`
-      > `5. Player753 (5.49 min)`
+      > `Leaderboard for Time Played:`  
+        `1. Player271 (11.01 h)`  
+        `2. Player709 (5.05 h)`  
+        `3. Player818 (2.1 h)`  
+        `4. Player734 (11.05 min)`  
+        `5. Player753 (5.49 min)`
