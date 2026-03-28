@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
@@ -23,6 +24,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import xyz.eclipseisoffline.commonpermissionsapi.api.CommonPermissions;
 
 import java.util.List;
 import java.util.Map;
@@ -49,9 +51,11 @@ public abstract class StatisticsInfo {
         registerCommands((dispatcher, buildContext) -> {
             dispatcher.register(Commands.literal("stats")
                     .then(Commands.literal("get")
+                            .requires(CommonPermissions.require(StatisticsInfoPermissions.STATISTICS_GET, PermissionLevel.GAMEMASTERS))
                             .then(StatTypeArgument.statType("type", buildContext)
                                     .then(StatKeyArgument.statKey("key", context -> StatTypeArgument.getStatType(context, "type").value())
                                             .then(Commands.argument("target", EntityArgument.player())
+                                                    .requires(CommonPermissions.require(StatisticsInfoPermissions.STATISTICS_GET_OTHER, PermissionLevel.GAMEMASTERS))
                                                     .executes(context -> statisticInfoCommand(context, EntityArgument.getPlayer(context, "target")))
                                             )
                                             .executes(context -> statisticInfoCommand(context, context.getSource().getPlayerOrException()))
@@ -59,6 +63,7 @@ public abstract class StatisticsInfo {
                             )
                     )
                     .then(Commands.literal("top")
+                            .requires(CommonPermissions.require(StatisticsInfoPermissions.STATISTICS_LEADERBOARD, PermissionLevel.GAMEMASTERS))
                             .then(StatTypeArgument.statType("type", buildContext)
                                     .then(StatKeyArgument.statKey("key", context -> StatTypeArgument.getStatType(context, "type").value())
                                             .executes(context -> {
