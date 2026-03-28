@@ -97,9 +97,13 @@ public abstract class StatisticsInfo {
         shareInfo.putString("type", Objects.requireNonNull(BuiltInRegistries.STAT_TYPE.getKey(type)).toString());
         shareInfo.putString("key", getStatIdentifier(stat).toString());
 
-        MutableComponent feedback = Component.literal("You have ").append(formatStatisticInfoForDisplay(target, stat)).append(" ");
-        feedback.append(Component.literal("[share]")
-                .withStyle(style -> style.withClickEvent(new ClickEvent.Custom(SHARE_STATISTICS_ACTION, Optional.of(shareInfo)))));
+        boolean targetIsSource = target == context.getSource().getPlayer();
+        MutableComponent subject = targetIsSource ? Component.literal("You have ") : Component.empty().append(target.getDisplayName()).append(" has ");
+        MutableComponent feedback = subject.append(formatStatisticInfoForDisplay(target, stat)).append(" ");
+        if (targetIsSource) {
+            feedback.append(Component.literal("[share]")
+                    .withStyle(style -> style.withClickEvent(new ClickEvent.Custom(SHARE_STATISTICS_ACTION, Optional.of(shareInfo)))));
+        }
 
         context.getSource().sendSuccess(() -> feedback, false);
         return value;
