@@ -1,1 +1,1 @@
-- Initial release.
+- Mark 26.1.1 as supported.
