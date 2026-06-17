@@ -26,9 +26,10 @@ For support and/or any questions you may have, feel free to join [my discord](ht
 
 ## Version support
 
-| Minecraft Version | Status       |
-|-------------------|--------------|
-| 26.1.x            | ✅ Current    |
+| Minecraft Version | Status        |
+|-------------------|---------------|
+| 26.2.x            | ✅ Current     |
+| 26.1.x            | ✔️ Available  |
 
 I try to keep support up for the latest drop of Minecraft. Updates to newer Minecraft
 versions may be delayed from time to time, as I do not always have the time to immediately update my mods.
