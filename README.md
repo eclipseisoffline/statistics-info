@@ -28,7 +28,8 @@ For support and/or any questions you may have, feel free to join [my discord](ht
 
 | Minecraft Version | Status        |
 |-------------------|---------------|
-| 26.2.x            | ✅ Current     |
+| 26.3.x            | ✅ Current     |
+| 26.2.x            | ✔️ Available  |
 | 26.1.x            | ✔️ Available  |
 
 I try to keep support up for the latest drop of Minecraft. Updates to newer Minecraft
@@ -52,7 +53,7 @@ The mod adds a single new command, `/stats`, which can be used as follows:
       > `You have used Torch 5043 times [share]`
     - `/stats get mined stone`
       > `You have mined Stone 30213 times [share]`
-- `/stats get <type> <key> <target`
+- `/stats get <type> <key> <target>`
   - Requires the `statistics_info.get` and `statistics_info.get.other` permissions, or operator level 2.
   - Displays a statistic of `<target>`.
   - Examples:
